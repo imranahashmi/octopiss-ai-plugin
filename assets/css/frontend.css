@@ -1,0 +1,281 @@
+/* SEO Challenge Blueprint Frontend Styles */
+
+/* CTA Block Styles */
+.scb-cta-block {
+    background: linear-gradient(135deg, #007cba 0%, #005a87 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 40px 30px;
+    margin: 40px 0;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 124, 186, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.scb-cta-block::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.scb-cta-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.scb-cta-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    display: block;
+    opacity: 0.9;
+}
+
+.scb-cta-icon i {
+    font-size: inherit;
+}
+
+.scb-cta-heading {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 20px;
+    color: white;
+    line-height: 1.3;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.scb-cta-text {
+    font-size: 18px;
+    margin: 0 0 30px;
+    opacity: 0.95;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.scb-cta-button {
+    display: inline-block;
+    background: white;
+    color: #007cba;
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.scb-cta-button:hover {
+    background: #f0f8ff;
+    color: #005a87;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
+}
+
+.scb-cta-button:active {
+    transform: translateY(-1px);
+}
+
+/* Gallery Block Styles */
+.scb-gallery-block {
+    margin: 40px 0;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.scb-gallery-block h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #333;
+    font-weight: 600;
+}
+
+.scb-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    justify-items: center;
+}
+
+.scb-gallery-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    background: white;
+    max-width: 250px;
+    width: 100%;
+}
+
+.scb-gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.scb-gallery-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.scb-gallery-item:hover img {
+    transform: scale(1.05);
+}
+
+/* Lightbox overlay (optional enhancement) */
+.scb-lightbox {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    align-items: center;
+    justify-content: center;
+}
+
+.scb-lightbox-content {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.scb-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10001;
+}
+
+.scb-lightbox-close:hover {
+    color: #ccc;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .scb-cta-block {
+        padding: 30px 20px;
+        margin: 30px 0;
+    }
+    
+    .scb-cta-heading {
+        font-size: 24px;
+    }
+    
+    .scb-cta-text {
+        font-size: 16px;
+    }
+    
+    .scb-cta-button {
+        font-size: 16px;
+        padding: 12px 24px;
+    }
+    
+    .scb-cta-icon {
+        font-size: 36px;
+    }
+    
+    .scb-gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .scb-gallery-block {
+        padding: 20px 15px;
+        margin: 30px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .scb-cta-block {
+        padding: 25px 15px;
+    }
+    
+    .scb-cta-heading {
+        font-size: 20px;
+    }
+    
+    .scb-cta-text {
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+    
+    .scb-cta-button {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+    
+    .scb-gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+}
+
+/* Animation keyframes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Add animations to elements when they come into view */
+.scb-cta-block {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.scb-gallery-item {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.scb-gallery-item:nth-child(2) { animation-delay: 0.1s; }
+.scb-gallery-item:nth-child(3) { animation-delay: 0.2s; }
+.scb-gallery-item:nth-child(4) { animation-delay: 0.3s; }
+.scb-gallery-item:nth-child(5) { animation-delay: 0.4s; }
+.scb-gallery-item:nth-child(6) { animation-delay: 0.5s; }
+
+/* Button hover animation */
+.scb-cta-button:hover {
+    animation: pulse 0.6s ease-in-out;
+}
