@@ -118,41 +118,79 @@ class SCB_Database {
     }
     
     /**
-     * Save agent
+     * Save agent with improved validation
      */
     public static function save_agent($data, $id = null) {
         global $wpdb;
         
+        // Validate required fields
+        $required_fields = array('title', 'city', 'category', 'frequency');
+        foreach ($required_fields as $field) {
+            if (empty($data[$field])) {
+                return new WP_Error('missing_field', "Required field '{$field}' is missing or empty.");
+            }
+        }
+        
+        // Validate topics array
+        if (!isset($data['topics']) || !is_array($data['topics'])) {
+            return new WP_Error('invalid_topics', 'Topics must be provided as an array.');
+        }
+        
+        // Remove empty topics
+        $data['topics'] = array_filter($data['topics'], function($topic) {
+            return !empty(trim($topic));
+        });
+        
+        if (empty($data['topics'])) {
+            return new WP_Error('no_topics', 'At least one topic must be provided.');
+        }
+        
         $table = $wpdb->prefix . 'scb_agents';
         
-        // Prepare data
+        // Prepare data with improved sanitization
         $agent_data = array(
             'title' => sanitize_text_field($data['title']),
             'city' => sanitize_text_field($data['city']),
             'category' => sanitize_text_field($data['category']),
             'frequency' => sanitize_text_field($data['frequency']),
-            'topics' => json_encode($data['topics']),
-            'featured_image_id' => intval($data['featured_image_id']),
-            'gallery_images' => json_encode($data['gallery_images']),
-            'meta_description' => sanitize_textarea_field($data['meta_description']),
-            'tags' => is_array($data['tags']) ? implode(',', array_map('sanitize_text_field', $data['tags'])) : sanitize_text_field($data['tags']),
+            'topics' => json_encode(array_map('sanitize_text_field', $data['topics'])),
+            'featured_image_id' => intval($data['featured_image_id']) ?: null,
+            'gallery_images' => json_encode(array_map('intval', $data['gallery_images'] ?: array())),
+            'meta_description' => sanitize_textarea_field($data['meta_description'] ?: ''),
+            'tags' => is_array($data['tags']) ? implode(',', array_map('sanitize_text_field', $data['tags'])) : sanitize_text_field($data['tags'] ?: ''),
             'cta_enabled' => isset($data['cta_enabled']) ? 1 : 0,
-            'cta_heading' => sanitize_text_field($data['cta_heading']),
-            'cta_text' => sanitize_textarea_field($data['cta_text']),
-            'cta_button_text' => sanitize_text_field($data['cta_button_text']),
-            'cta_button_url' => esc_url_raw($data['cta_button_url']),
-            'cta_icon' => sanitize_text_field($data['cta_icon']),
-            'status' => sanitize_text_field($data['status']) ?: 'active'
+            'cta_heading' => sanitize_text_field($data['cta_heading'] ?: ''),
+            'cta_text' => sanitize_textarea_field($data['cta_text'] ?: ''),
+            'cta_button_text' => sanitize_text_field($data['cta_button_text'] ?: ''),
+            'cta_button_url' => esc_url_raw($data['cta_button_url'] ?: ''),
+            'cta_icon' => sanitize_text_field($data['cta_icon'] ?: ''),
+            'status' => in_array($data['status'] ?? 'active', array('active', 'inactive')) ? $data['status'] : 'active'
         );
+        
+        // Handle used_topics for existing agents
+        if ($id) {
+            $existing_agent = self::get_agent($id);
+            if ($existing_agent) {
+                $agent_data['used_topics'] = json_encode($existing_agent->used_topics ?: array());
+            }
+        } else {
+            $agent_data['used_topics'] = json_encode(array());
+        }
         
         if ($id) {
             // Update existing agent
             $result = $wpdb->update($table, $agent_data, array('id' => $id));
-            return $result !== false ? $id : false;
+            if ($result === false) {
+                return new WP_Error('db_error', 'Database error: ' . $wpdb->last_error);
+            }
+            return $id;
         } else {
             // Insert new agent
             $result = $wpdb->insert($table, $agent_data);
-            return $result !== false ? $wpdb->insert_id : false;
+            if ($result === false) {
+                return new WP_Error('db_error', 'Database error: ' . $wpdb->last_error);
+            }
+            return $wpdb->insert_id;
         }
     }
     

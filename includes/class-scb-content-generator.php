@@ -144,18 +144,151 @@ class SCB_Content_Generator {
      * Call AI service (placeholder implementation)
      */
     private function call_ai_service($prompt) {
-        // This would integrate with OpenAI, Claude, or another AI service
-        // For now, return sample content
+        // Get API settings
+        $settings = get_option('scb_settings', array());
+        $ai_service = $settings['ai_service'] ?? 'openai';
+        $api_key = $settings['api_key'] ?? '';
+        
+        // For now, return sample content - in production, this would call the actual AI service
+        if (empty($api_key)) {
+            error_log('SCB: No AI API key configured');
+            return $this->generate_sample_content($prompt);
+        }
+        
+        // Example of how OpenAI integration would work:
+        /*
+        if ($ai_service === 'openai') {
+            return $this->call_openai_api($prompt, $api_key);
+        } elseif ($ai_service === 'claude') {
+            return $this->call_claude_api($prompt, $api_key);
+        }
+        */
+        
+        // For demo purposes, return sample content
+        return $this->generate_sample_content($prompt);
+    }
+    
+    /**
+     * Generate sample content for demonstration
+     */
+    private function generate_sample_content($prompt) {
+        // Extract topic from prompt for title generation
+        preg_match("/about '(.+?)'/", $prompt, $matches);
+        $topic = $matches[1] ?? 'Sample Topic';
+        
+        // Extract city from prompt
+        preg_match("/city '(.+?)'/", $prompt, $city_matches);
+        $city = $city_matches[1] ?? 'Sample City';
+        
+        $titles = array(
+            "The Ultimate Guide to " . $topic,
+            "Everything You Need to Know About " . $topic,
+            "A Comprehensive Look at " . $topic,
+            "Understanding " . $topic . ": A Professional Perspective",
+            "Expert Insights on " . $topic
+        );
+        
+        $sample_content = $this->generate_sample_article_content($topic, $city);
         
         return array(
-            'title' => 'Generated Article Title',
-            'content' => '<p>This is sample generated content based on the prompt. In a real implementation, this would call an AI service like OpenAI GPT or Claude.</p>
-                         <h2>Main Section</h2>
-                         <p>Content with natural city mentions would be generated here.</p>
-                         <h2>Additional Information</h2>
-                         <p>More content following the prompt guidelines.</p>'
+            'title' => $titles[array_rand($titles)],
+            'content' => $sample_content
         );
     }
+    
+    /**
+     * Generate realistic sample article content
+     */
+    private function generate_sample_article_content($topic, $city) {
+        $content = "<p>In today's rapidly evolving landscape, understanding {$topic} has become increasingly important for individuals and businesses alike. This comprehensive guide will explore the key aspects of {$topic} and provide valuable insights for our readers.</p>";
+        
+        $content .= "<h2>What is {$topic}?</h2>";
+        $content .= "<p>{$topic} represents a significant area of focus in the modern world. For local businesses in {$city}, staying informed about {$topic} can provide a competitive advantage and help drive success in an increasingly competitive market.</p>";
+        
+        $content .= "<h2>Key Benefits and Considerations</h2>";
+        $content .= "<p>When it comes to {$topic}, there are several important factors to consider:</p>";
+        $content .= "<ul>";
+        $content .= "<li>Understanding the fundamental principles</li>";
+        $content .= "<li>Implementing best practices</li>";
+        $content .= "<li>Staying updated with latest trends</li>";
+        $content .= "<li>Measuring success and ROI</li>";
+        $content .= "</ul>";
+        
+        $content .= "<h2>Best Practices for Success</h2>";
+        $content .= "<p>Based on extensive research and real-world experience, we've identified several best practices that can help individuals and organizations maximize their success with {$topic}. These strategies have been proven effective by our {$city} clients and industry professionals.</p>";
+        
+        $content .= "<h3>Getting Started</h3>";
+        $content .= "<p>The first step in any successful {$topic} initiative is proper planning and preparation. This involves understanding your goals, identifying key stakeholders, and developing a clear strategy for implementation.</p>";
+        
+        $content .= "<h3>Implementation Strategy</h3>";
+        $content .= "<p>A well-executed implementation strategy is crucial for success. This includes setting realistic timelines, allocating appropriate resources, and establishing clear metrics for measuring progress and success.</p>";
+        
+        $content .= "<h2>Common Challenges and Solutions</h2>";
+        $content .= "<p>While {$topic} offers numerous benefits, it's important to be aware of potential challenges that may arise during implementation. Understanding these challenges and having solutions ready can help ensure a smoother process.</p>";
+        
+        $content .= "<h2>Future Outlook</h2>";
+        $content .= "<p>Looking ahead, {$topic} will continue to evolve and adapt to changing market conditions and technological advances. Staying informed about emerging trends and developments will be crucial for long-term success throughout {$city} and beyond.</p>";
+        
+        $content .= "<h2>Conclusion</h2>";
+        $content .= "<p>In conclusion, {$topic} represents a valuable opportunity for growth and success. By understanding the key principles, implementing best practices, and staying informed about emerging trends, individuals and organizations can position themselves for long-term success in this dynamic field.</p>";
+        
+        return $content;
+    }
+    
+    /**
+     * Example OpenAI API integration (commented out - requires API key and proper error handling)
+     */
+    /*
+    private function call_openai_api($prompt, $api_key) {
+        $url = 'https://api.openai.com/v1/chat/completions';
+        
+        $data = array(
+            'model' => 'gpt-3.5-turbo',
+            'messages' => array(
+                array(
+                    'role' => 'user',
+                    'content' => $prompt
+                )
+            ),
+            'max_tokens' => 2000,
+            'temperature' => 0.7
+        );
+        
+        $args = array(
+            'body' => json_encode($data),
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $api_key
+            ),
+            'timeout' => 60
+        );
+        
+        $response = wp_remote_post($url, $args);
+        
+        if (is_wp_error($response)) {
+            error_log('SCB OpenAI API Error: ' . $response->get_error_message());
+            return false;
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        
+        if (isset($data['choices'][0]['message']['content'])) {
+            $content = $data['choices'][0]['message']['content'];
+            
+            // Try to parse as JSON if formatted that way
+            $parsed = json_decode($content, true);
+            if ($parsed && isset($parsed['title']) && isset($parsed['content'])) {
+                return $parsed;
+            }
+            
+            // Fallback: extract title and content manually
+            return $this->parse_ai_response($content);
+        }
+        
+        return false;
+    }
+    */
     
     /**
      * Create WordPress post with generated content

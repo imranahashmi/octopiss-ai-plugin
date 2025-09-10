@@ -56,6 +56,7 @@ class SEOChallengeBlueprint {
      * Load plugin dependencies
      */
     private function load_dependencies() {
+        require_once SCB_PLUGIN_PATH . 'includes/scb-functions.php';
         require_once SCB_PLUGIN_PATH . 'includes/class-scb-database.php';
         require_once SCB_PLUGIN_PATH . 'includes/class-scb-admin.php';
         require_once SCB_PLUGIN_PATH . 'includes/class-scb-agent.php';
@@ -67,11 +68,29 @@ class SEOChallengeBlueprint {
      * Plugin activation hook
      */
     public function activate() {
+        // Check requirements
+        $errors = scb_check_requirements();
+        if (!empty($errors)) {
+            deactivate_plugins(plugin_basename(__FILE__));
+            wp_die('Plugin activation failed: ' . implode('<br>', $errors));
+        }
+        
         // Create database tables
         SCB_Database::create_tables();
         
         // Set default options
         add_option('scb_version', SCB_PLUGIN_VERSION);
+        
+        // Set default settings
+        $default_settings = array(
+            'ai_service' => 'openai',
+            'api_key' => '',
+            'default_post_status' => 'draft',
+            'enable_auto_generation' => true,
+            'content_length' => 1000,
+            'city_mention_frequency' => 3
+        );
+        add_option('scb_settings', $default_settings);
         
         // Flush rewrite rules
         flush_rewrite_rules();

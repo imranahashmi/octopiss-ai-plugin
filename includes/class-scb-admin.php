@@ -152,18 +152,32 @@ class SCB_Admin {
             'status' => sanitize_text_field($_POST['status'])
         );
         
-        // If editing, filter out topics that are already used
+        // If editing, ensure used topics are preserved and filter out duplicate new topics
         if ($agent_id) {
             $existing_agent = SCB_Database::get_agent($agent_id);
             if ($existing_agent) {
-                $new_topics = array_diff($agent_data['topics'], $existing_agent->used_topics);
-                $agent_data['topics'] = array_merge($existing_agent->used_topics, $new_topics);
+                $existing_used_topics = $existing_agent->used_topics ?: array();
+                $new_topics = $agent_data['topics'];
+                
+                // Filter out topics that are already used (can't be added again)
+                $available_new_topics = array_diff($new_topics, $existing_used_topics);
+                
+                // Preserve existing used topics and add only new unused topics
+                $agent_data['topics'] = array_unique(array_merge($existing_used_topics, $available_new_topics));
+                
+                // Keep the used_topics list unchanged
+                $agent_data['used_topics'] = json_encode($existing_used_topics);
             }
+        } else {
+            // For new agents, initialize used_topics as empty
+            $agent_data['used_topics'] = json_encode(array());
         }
         
         $result = SCB_Database::save_agent($agent_data, $agent_id);
         
-        if ($result) {
+        if (is_wp_error($result)) {
+            wp_send_json_error($result->get_error_message());
+        } elseif ($result) {
             wp_send_json_success(array(
                 'message' => $agent_id ? 'Agent updated successfully' : 'Agent created successfully',
                 'agent_id' => $result
